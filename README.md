@@ -11,7 +11,11 @@ This README documents, in chronological order, the steps I followed to adapt the
    python -m venv etlenv
    etlenv\Scripts\activate
    ```
-3. Installed the libraries I needed (captured in `requirements.txt`) with `pip freeze > requirements.txt` :
+3. Installed the libraries I needed (captured in `requirements.txt`) that I did when I finished the project with :
+```powershell
+pip freeze > requirements.txt
+```
+
    ```powershell
    pip install -r requirements.txt
    ```
