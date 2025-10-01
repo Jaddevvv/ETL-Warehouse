@@ -1,8 +1,0 @@
-I got this error :   File "C:\Users\33668\Documents\Albert school Msc2\ETL Warehouse\etlenv\Lib\site-packages\snowflake\connector\errors.py", line 217, in default_errorhandler
-    raise error_class(
-snowflake.connector.errors.ProgrammingError: 253006: File doesn't exist: ['C:UsersÞ68AppDataLocalTemp\tmptpkjjude/31c2dc54-9e1e-11f0-a1a6-da33e7434e31.parquet']
-(etlenv)
-
-
-while running 
-gunzip -c data.json.gz | python batch_insert.py 100000
