@@ -45,9 +45,11 @@ def save_to_snowflake(snow, batch, temp_dir):
         columns=[
             "TXID",
             "RFID",
-            "ITEM",  # Changed from RESORT to ITEM
+            "CAR_MODEL",
+            "BRAND",
+            "ENGINE",
+            "HORSEPOWER",
             "PURCHASE_TIME",
-            "EXPIRATION_TIME",
             "DAYS",
             "NAME",
             "ADDRESS",
@@ -60,14 +62,36 @@ def save_to_snowflake(snow, batch, temp_dir):
     out_path = Path(temp_dir.name) / f"{uuid.uuid1()}.parquet"
     pq.write_table(arrow_table, out_path, use_dictionary=False, compression="SNAPPY")
     stage_path = out_path.resolve().as_posix()
+    snow.cursor().execute("REMOVE @%CLIENT_BUY_ORDERS")
     snow.cursor().execute(
-        "PUT 'file://{0}' @%CLIENT_SUPPORT_ORDERS".format(stage_path)  # Updated table name
+        "PUT 'file://{0}' @%CLIENT_BUY_ORDERS".format(stage_path)  # Updated table name
     )
     out_path.unlink()
     snow.cursor().execute(
-        "COPY INTO CLIENT_SUPPORT_ORDERS FILE_FORMAT=(TYPE='PARQUET') MATCH_BY_COLUMN_NAME=CASE_SENSITIVE PURGE=TRUE"  # Updated table name
+        "COPY INTO CLIENT_BUY_ORDERS FILE_FORMAT=(TYPE='PARQUET') MATCH_BY_COLUMN_NAME=CASE_SENSITIVE PURGE=TRUE"  # Updated table name
     )
     logging.debug(f"inserted {len(batch)} orders")  # Changed from tickets to orders
+
+def normalize_record(record):
+    def coalesce(value, default):
+        return value if value not in (None, "") else default
+
+    return (
+        record["txid"],
+        record["rfid"],
+        coalesce(record.get("car_model"), "UNKNOWN"),
+        coalesce(record.get("brand"), "UNKNOWN"),
+        coalesce(record.get("engine"), "UNKNOWN"),
+        coalesce(record.get("horsepower"), 0),
+        record["purchase_time"],
+        record["days"],
+        record["name"],
+        record.get("address"),
+        record.get("phone"),
+        record.get("email"),
+        record.get("emergency_contact"),
+    )
+
 
 
 if __name__ == "__main__":
@@ -79,21 +103,7 @@ if __name__ == "__main__":
     for message in sys.stdin:
         if message != "\n":
             record = json.loads(message)
-            batch.append(
-                (
-                    record["txid"],
-                    record["rfid"],
-                    record["item"],  # Changed from resort to item
-                    record["purchase_time"],
-                    record["expiration_time"],
-                    record["days"],
-                    record["name"],
-                    record["address"],
-                    record["phone"],
-                    record["email"],
-                    record["emergency_contact"],
-                )
-            )
+            batch.append(normalize_record(record))
             if len(batch) == batch_size:
                 save_to_snowflake(snow, batch, temp_dir)
                 batch = []
@@ -104,3 +114,4 @@ if __name__ == "__main__":
     temp_dir.cleanup()
     snow.close()
     logging.info("Ingest1 complete")
+

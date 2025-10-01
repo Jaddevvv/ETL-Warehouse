@@ -25,30 +25,35 @@ GRANT ROLE INGEST1 TO USER INGEST1;
 -- Grant yourself the INGEST1 role for management
 SET USERNAME=CURRENT_USER();
 GRANT ROLE INGEST1 TO USER IDENTIFIER($USERNAME);
-5.2 Create the Table
+-- 5.2 Create the Table
 USE ROLE INGEST1;
 
--- Table for Kpop Demon Hunter merchandise orders
-CREATE OR REPLACE TABLE CLIENT_SUPPORT_ORDERS (
+-- Table for car buy orders
+CREATE OR REPLACE TABLE CLIENT_BUY_ORDERS (
     TXID VARCHAR(255) NOT NULL,
-    RFID VARCHAR(255) NOT NULL,  
-    ITEM VARCHAR(255) NOT NULL,
+    RFID VARCHAR(255) NOT NULL,
+    CAR_MODEL VARCHAR(255) NOT NULL,
+    BRAND VARCHAR(255) NOT NULL,
+    ENGINE VARCHAR(255) NOT NULL,
+    HORSEPOWER NUMBER NOT NULL,
     PURCHASE_TIME TIMESTAMP NOT NULL,
-    EXPIRATION_TIME DATE NOT NULL,
     DAYS NUMBER NOT NULL,
     NAME VARCHAR(255) NOT NULL,
-    ADDRESS VARIANT,                     
+    ADDRESS VARIANT,                 
     PHONE VARCHAR(255),                  
     EMAIL VARCHAR(255),                  
-    EMERGENCY_CONTACT VARIANT,           
+    EMERGENCY_CONTACT VARIANT, 
     PRIMARY KEY (TXID)
 );
 
 -- Add comments for clarity
-COMMENT ON TABLE CLIENT_SUPPORT_ORDERS IS 'Customer orders for Kpop Demon Hunter merchandise inventory';
-COMMENT ON COLUMN CLIENT_SUPPORT_ORDERS.ITEM IS 'Product from Kpop Demon Hunter merchandise inventory';
-COMMENT ON COLUMN CLIENT_SUPPORT_ORDERS.ADDRESS IS 'JSON: {street_address, city, state, postalcode} or NULL';
-COMMENT ON COLUMN CLIENT_SUPPORT_ORDERS.EMERGENCY_CONTACT IS 'JSON: {name, phone} or NULL';
+COMMENT ON TABLE CLIENT_BUY_ORDERS IS 'Customer orders for car buy inventory';
+COMMENT ON COLUMN CLIENT_BUY_ORDERS.CAR_MODEL IS 'Car model';
+COMMENT ON COLUMN CLIENT_BUY_ORDERS.BRAND IS 'Car brand';
+COMMENT ON COLUMN CLIENT_BUY_ORDERS.ENGINE IS 'Car engine';
+COMMENT ON COLUMN CLIENT_BUY_ORDERS.HORSEPOWER IS 'Car horsepower';
+COMMENT ON COLUMN CLIENT_BUY_ORDERS.ADDRESS IS 'JSON: {street_address, city, state, postalcode} or NULL';
+COMMENT ON COLUMN CLIENT_BUY_ORDERS.EMERGENCY_CONTACT IS 'JSON: {name, phone} or NULL';
 
 
 
@@ -72,3 +77,40 @@ USE DATABASE INGEST1;
 USE SCHEMA INGEST1.INGEST1;
 -- Thing that showed me that table name didn't exist and was actually CLIENT_SUPPORT_ORDERS
 SHOW TABLES LIKE 'CLIENT_SUPPORT_ORDERS_PY_COPY_INTO';
+
+
+
+
+
+USE ROLE INGEST1;
+USE DATABASE INGEST1;
+USE SCHEMA INGEST1;
+
+-- Check row count
+SELECT COUNT(*) FROM CLIENT_BUY_ORDERS;
+
+-- View sample records
+SELECT * FROM CLIENT_BUY_ORDERS LIMIT 5;
+
+-- Check data distribution by cars model    
+SELECT CAR_MODEL, COUNT(*) as order_count 
+FROM CLIENT_BUY_ORDERS 
+GROUP BY CAR_MODEL 
+ORDER BY order_count DESC;
+
+
+
+
+
+-- Get Table data to see all the columns
+DESCRIBE TABLE CLIENT_BUY_ORDERS;
+
+
+-- Remove duplicates because we made some tests in the beginning and it had multiple exact rows
+    CREATE OR REPLACE TABLE CLIENT_BUY_ORDERS AS
+    SELECT DISTINCT *
+    FROM CLIENT_BUY_ORDERS;
+
+
+
+
