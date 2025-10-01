@@ -1,4 +1,4 @@
-# Car Orders Snowflake Ingestion - GROUP 5
+# ETL Motors - Car Orders Snowflake Ingestion - GROUP 5
 
 This README documents, in chronological order, the steps I followed to adapt the teacher's Snowflake ingestion exercise to my own car-sales scenario. Every command I ran is captured below so the entire workflow can be replayed end to end.
 
