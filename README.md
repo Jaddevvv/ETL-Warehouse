@@ -2,7 +2,7 @@
 
 This README documents, in chronological order, the steps I followed to adapt the teacher's Snowflake ingestion exercise to my own car-sales scenario. Every command I ran is captured below so the entire workflow can be replayed end to end.
 
-## Made by GROUP 5: Mohamed Jad Kabbaj, Ilyes Kabbour, Valentin Gorse
+## Made by GROUP 5: Mohamed Jad Kabbaj, Ilyes Kabbour, Valentin Gorse, Lassouani Yacine
 
 ## 1. Workspace & Python Environment
 1. Created the project directory and moved into it (already done in this repository).
