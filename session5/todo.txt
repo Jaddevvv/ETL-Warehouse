@@ -1,0 +1,6 @@
+Faire juste un streamlit random qui doit etre cohérent d'un point de vue business.
+
+
+
+2 choses : 
+- Monitoring + BI
