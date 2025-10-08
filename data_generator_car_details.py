@@ -5,8 +5,8 @@ import uuid
 import random
 
 from dotenv import load_dotenv
-from faker import Faker
 from datetime import date, datetime
+from faker import Faker
 
 load_dotenv()
 fake = Faker()
@@ -25,32 +25,38 @@ global car_descriptions
 with open('car_descriptions.json', 'r', encoding="utf-8") as f:
     car_descriptions = json.load(f)
 
+for car in car_descriptions:
+    car["buy_price"] = int(car["prix_estime"] * random.uniform(0.8, 0.95))
+
+
 
 def print_client_support():
-    global inventory, fake
-    state = fake.state_abbr()
+    global inventory
     car_model = fake.random_element(elements=inventory)
+
 
     car_horsepower = next((car["horsepower"] for car in car_descriptions if car["name"] == car_model), None)
     car_engine = next((car["engine"] for car in car_descriptions if car["name"] == car_model), None)
     car_brand = next((car["brand"] for car in car_descriptions if car["name"] == car_model), None)
-    sell_price = next((car["prix_estime"] for car in car_descriptions if car["name"] == car_model), None)
+    # random -5 to -20% from sell_price reduction
+    buy_price = next((car["buy_price"] for car in car_descriptions if car["name"] == car_model), None)
+    car_type = next((car["type"] for car in car_descriptions if car["name"] == car_model), None)
+    car_autonomy = next((car["autonomy"] for car in car_descriptions if car["name"] == car_model), None)
+    car_consumption = next((car["consumption"]["kWh_100km"] for car in car_descriptions if car["name"] == car_model), None)
+    car_release_date = next((car["release_date"] for car in car_descriptions if car["name"] == car_model), None)
+
+
+
     client_support = {'txid': str(uuid.uuid4()),
-                      'rfid': hex(random.getrandbits(96)),
-                      'car_model': car_model,
-                      'brand': car_brand,
-                      'engine': car_engine,
-                      'horsepower': car_horsepower,
-                      'sell_price': sell_price,
-                      'purchase_time': fake.date_time_between(start_date='-2y', end_date='now').isoformat(),
-                      'days': fake.random_int(min=1, max=7),
-                      'name': fake.name(),
-                      'address': fake.none_or({'street_address': fake.street_address(), 
-                                                'city': fake.city(), 'state': state, 
-                                                'postalcode': fake.postalcode_in_state(state)}),
-                      'phone': fake.none_or(fake.phone_number()),
-                      'email': fake.none_or(fake.email()),
-                      'emergency_contact' : fake.none_or({'name': fake.name(), 'phone': fake.phone_number()}),
+                    'car_model': car_model,
+                    'brand': car_brand,
+                    'engine': car_engine,
+                    'horsepower': car_horsepower,
+                    'buy_price': buy_price,
+                    'type' : car_type,
+                    'autonomy' : car_autonomy,
+                    'consumption' : car_consumption,
+                    'release_date' : car_release_date,
     }
     d = json.dumps(client_support) + '\n'
     sys.stdout.write(d)

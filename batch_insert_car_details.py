@@ -44,32 +44,28 @@ def save_to_snowflake(snow, batch, temp_dir):
         batch,
         columns=[
             "TXID",
-            "RFID",
             "CAR_MODEL",
             "BRAND",
             "ENGINE",
             "HORSEPOWER",
-            "SELL_PRICE",
-            "PURCHASE_TIME",
-            "DAYS",
-            "NAME",
-            "ADDRESS",
-            "PHONE",
-            "EMAIL",
-            "EMERGENCY_CONTACT",
+            "BUY_PRICE",
+            "TYPE",
+            "AUTONOMY",
+            "CONSUMPTION",
+            "RELEASE_DATE",
         ],
     )
     arrow_table = pa.Table.from_pandas(pandas_df)
     out_path = Path(temp_dir.name) / f"{uuid.uuid1()}.parquet"
     pq.write_table(arrow_table, out_path, use_dictionary=False, compression="SNAPPY")
     stage_path = out_path.resolve().as_posix()
-    snow.cursor().execute("REMOVE @%CLIENT_BUY_ORDERS")
+    snow.cursor().execute("REMOVE @%CAR_DETAILS")
     snow.cursor().execute(
-        "PUT 'file://{0}' @%CLIENT_BUY_ORDERS".format(stage_path)  # Updated table name
+        "PUT 'file://{0}' @%CAR_DETAILS".format(stage_path)  # Updated table name
     )
     out_path.unlink()
     snow.cursor().execute(
-        "COPY INTO CLIENT_BUY_ORDERS FILE_FORMAT=(TYPE='PARQUET') MATCH_BY_COLUMN_NAME=CASE_SENSITIVE PURGE=TRUE"  # Updated table name
+        "COPY INTO CAR_DETAILS FILE_FORMAT=(TYPE='PARQUET') MATCH_BY_COLUMN_NAME=CASE_SENSITIVE PURGE=TRUE"  # Updated table name
     )
     logging.debug(f"inserted {len(batch)} orders")  # Changed from tickets to orders
 
@@ -79,19 +75,15 @@ def normalize_record(record):
 
     return (
         record["txid"],
-        record["rfid"],
         record["car_model"],
         record["brand"],
         record["engine"],
         record["horsepower"],
-        record["sell_price"],
-        record["purchase_time"],
-        record["days"],
-        record["name"],
-        record.get("address"),
-        record.get("phone"),
-        record.get("email"),
-        record.get("emergency_contact"),
+        record["buy_price"],
+        record["type"],
+        record["autonomy"],
+        record["consumption"],
+        record["release_date"],
     )
 
 
